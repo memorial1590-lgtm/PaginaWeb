@@ -396,10 +396,17 @@ class HuellitasApp {
       favBtn.addEventListener('click', () => this.openFavoritesModal());
     }
 
-    // Publica tu Mascota Trigger
+    // Publica tu Mascota Trigger (requiere sesión iniciada)
     const publishBtn = document.getElementById('publish-pet-btn');
     if (publishBtn) {
-      publishBtn.addEventListener('click', () => this.openPublishModal());
+      publishBtn.addEventListener('click', () => {
+        const auth = window.huellitasAuth;
+        if (auth && !auth.isLoggedIn()) {
+          auth.openAccountModal('login', 'publish');
+          return;
+        }
+        this.openPublishModal();
+      });
     }
 
     // Publish Pet Form Submit
@@ -753,18 +760,21 @@ class HuellitasApp {
   handlePublishPet(form) {
     const formData = new FormData(form);
     const species = formData.get('species') || 'perro';
-    const breed = formData.get('breed') || 'Raza a evaluar';
-    const name = formData.get('name') || 'Mascota';
-    const age = formData.get('age') || '1 año';
+    const breed = (formData.get('breed') || '').trim() || 'Raza a evaluar';
+    const name = (formData.get('petName') || '').trim() || 'Mascota';
+    const age = (formData.get('age') || '').trim() || '1 año';
     const gender = formData.get('gender') || 'Macho';
     const size = formData.get('size') || 'Mediano';
-    const location = formData.get('location') || 'Huánuco, Perú';
-    const description = formData.get('description') || 'En búsqueda de una segunda oportunidad.';
-    const imageUrl = formData.get('imageUrl') || 'images/pastor-aleman.jpg';
+    const location = (formData.get('location') || '').trim() || 'Huánuco, Perú';
+    const description = (formData.get('description') || '').trim() || 'En búsqueda de una segunda oportunidad.';
+    const imageUrl = (formData.get('imageUrl') || '').trim() || 'images/pastor-aleman.jpg';
 
     const speciesLabelMap = {
       perro: 'Perro',
       gato: 'Gato',
+      conejo: 'Conejo',
+      aves: 'Ave',
+      'pequeños animales': 'Pequeño animal',
       otros: 'Otros'
     };
 
@@ -783,7 +793,7 @@ class HuellitasApp {
       fullStory: description,
       image: imageUrl,
       gallery: [imageUrl],
-      tags: [breed, 'En adopción responsable', 'Huánuco'],
+      tags: [breed, 'En adopción responsable', location.split(',')[0]],
       medical: {
         vaccinated: true,
         neutered: true,
@@ -794,13 +804,72 @@ class HuellitasApp {
       coatColor: 'Estándar'
     };
 
-    this.pets.unshift(newPet);
-    this.savePets();
-    this.closeModal(this.publishModal);
-    this.renderPets();
-    form.reset();
+    const auth = window.huellitasAuth;
 
-    this.showToast(`🐾 ¡${name} fue publicado con éxito en el catálogo!`);
+    // El administrador publica directamente; los clientes envían una solicitud.
+    if (auth && auth.isAdmin) {
+      this.addApprovedPet(newPet);
+      this.closeModal(this.publishModal);
+      form.reset();
+      this.showToast(`🐾 ¡${name} fue publicada en el catálogo!`);
+      return;
+    }
+
+    if (!auth || !auth.isLoggedIn()) {
+      this.closeModal(this.publishModal);
+      auth?.openAccountModal('login', 'publish');
+      return;
+    }
+
+    auth.addRequest(newPet);
+    this.closeModal(this.publishModal);
+    form.reset();
+    this.showToast('📩 Solicitud enviada. El administrador la revisará pronto.');
+  }
+
+  openPublishModal() {
+    const form = document.getElementById('publish-form');
+    if (form) form.reset();
+
+    const isAdmin = Boolean(window.huellitasAuth?.isAdmin);
+    const note = document.getElementById('publish-review-note');
+    if (note) note.classList.toggle('hidden', isAdmin);
+
+    const title = this.publishModal?.querySelector('h3');
+    if (title) {
+      title.textContent = isAdmin
+        ? 'Publicar una mascota en adopción'
+        : 'Publica una mascota en adopción';
+    }
+
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.textContent = isAdmin ? 'Publicar en el catálogo' : 'Enviar solicitud de publicación';
+    }
+
+    this.openModal(this.publishModal);
+  }
+
+  /** Agrega al catálogo una mascota aprobada por el administrador. */
+  addApprovedPet(pet) {
+    if (!pet || !pet.id) return false;
+    if (this.pets.some((item) => item.id === pet.id)) return false;
+
+    this.pets.unshift(pet);
+    this.savePets();
+    this.renderPets();
+    return true;
+  }
+
+  /** Quita del catálogo una mascota publicada. */
+  removeApprovedPet(petId) {
+    const index = this.pets.findIndex((item) => item.id === petId);
+    if (index === -1) return false;
+
+    this.pets.splice(index, 1);
+    this.savePets();
+    this.renderPets();
+    return true;
   }
 
   toggleFavorite(petId) {
@@ -943,8 +1012,22 @@ class HuellitasApp {
   }
 
   loadPets() {
-    // Return verified INITIAL_PETS catalog
-    return INITIAL_PETS;
+    // Catálogo base + mascotas aprobadas o publicadas guardadas en el navegador
+    const base = INITIAL_PETS.map((pet) => pet);
+
+    try {
+      const saved = JSON.parse(localStorage.getItem('huellitas_pets') || '[]');
+      if (!Array.isArray(saved)) return base;
+
+      const extra = saved.filter(
+        (pet) => pet && pet.id && !base.some((item) => item.id === pet.id)
+      );
+
+      return [...extra, ...base];
+    } catch (error) {
+      console.warn('No se pudo cargar el catálogo guardado:', error);
+      return base;
+    }
   }
 
   savePets() {
