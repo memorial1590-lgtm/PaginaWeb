@@ -20,6 +20,9 @@ visor 3D interactivo de cada animal.
 ├── app.js          # Lógica de la aplicación y datos de las mascotas
 ├── viewer3d.js     # Visor 3D interactivo (Three.js)
 ├── server.js       # Servidor HTTP estático (Node.js)
+├── favicon.svg     # Icono de la pestaña (huella de la marca)
+├── favicon.ico     # Icono para navegadores antiguos (16/32/48 px)
+├── site.webmanifest  # Manifest para "Añadir a pantalla de inicio"
 └── images/         # Fotografías de las mascotas
 ```
 
