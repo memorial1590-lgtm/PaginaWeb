@@ -38,6 +38,26 @@ body {
   background: #94a3b8;
 }
 
+/* Hero search: todos los campos y el botón comparten la misma altura */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 3rem;
+  padding: 0 0.875rem;
+}
+
+.search-field select {
+  line-height: 1.25rem;
+}
+
+/* En pantallas muy angostas el header no cabe: se oculta el acceso a favoritos */
+@media (max-width: 359px) {
+  #favorites-btn {
+    display: none;
+  }
+}
+
 /* Category Button Styling */
 .category-btn {
   display: flex;
