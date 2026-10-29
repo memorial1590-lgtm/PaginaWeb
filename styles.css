@@ -155,3 +155,75 @@ body {
     transform: scale(1) translateY(0);
   }
 }
+
+/* ==========================================================
+   Autenticación (login / registro) y panel de administración
+   ========================================================== */
+
+/* Pestañas del modal de cuenta */
+.auth-tab {
+  color: #6b7280;
+}
+
+.auth-tab:hover {
+  color: #194a37;
+}
+
+.auth-tab-active {
+  background-color: #ffffff;
+  color: #194a37;
+  box-shadow: 0 1px 2px rgba(15, 41, 30, 0.08);
+}
+
+/* Pestañas del panel de administración */
+.admin-tab {
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-tab:hover {
+  color: #194a37;
+  background-color: #f3f4f6;
+}
+
+.admin-tab-active {
+  background-color: #194a37;
+  color: #ffffff;
+}
+
+.admin-tab-active:hover {
+  background-color: #143d31;
+  color: #ffffff;
+}
+
+/* Etiquetas de estado de las solicitudes */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.status-pendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-aprobada {
+  background-color: #d9efe1;
+  color: #175338;
+}
+
+.status-rechazada {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
