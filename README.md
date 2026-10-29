@@ -1,4 +1,4 @@
-# 🐾 Huellitas — Adopta, Cuida y Cambia una Vida
+# 🐾 Adoptemos — Adopta, Cuida y Cambia una Vida
 
 Sitio web de adopción de mascotas con catálogo de mascotas, fichas detalladas y un
 visor 3D interactivo de cada animal.

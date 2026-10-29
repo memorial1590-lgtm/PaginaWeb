@@ -1,6 +1,6 @@
 {
-  "name": "Huellitas — Adopta, Cuida y Cambia una Vida",
-  "short_name": "Huellitas",
+  "name": "Adoptemos — Adopta, Cuida y Cambia una Vida",
+  "short_name": "Adoptemos",
   "description": "Catálogo de mascotas en adopción con fichas detalladas y visor 3D interactivo.",
   "start_url": "./index.html",
   "scope": "./",
